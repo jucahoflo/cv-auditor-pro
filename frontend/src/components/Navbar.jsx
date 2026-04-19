@@ -14,7 +14,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
-        CV-AUDITOR-PRO
+        KillerJobs
       </Link>
       <div className="navbar-links">
         {user ? (
@@ -24,7 +24,7 @@ function Navbar() {
             <Link to="/history">📜 Historial</Link>
             <Link to="/pricing">💎 Planes</Link>
             <span style={{ 
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
               padding: '0.25rem 0.75rem',
               borderRadius: '2rem',
               color: 'white',

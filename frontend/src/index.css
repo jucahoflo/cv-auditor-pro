@@ -1,5 +1,5 @@
-/* Importar fuentes modernas */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+/* Importar fuentes modernas para KillerJobs */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
 * {
   margin: 0;
@@ -8,10 +8,22 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #1a1a2e;
+}
+
+/* Títulos principales con Bebas Neue (más agresivo) */
+h1, .h1, .navbar-brand {
+  font-family: 'Bebas Neue', cursive;
+  letter-spacing: 2px;
+}
+
+/* Subtítulos */
+h2, h3, h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
 }
 
 .container {
@@ -36,9 +48,9 @@ body {
 }
 
 .navbar-brand {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -46,14 +58,16 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: 'Bebas Neue', cursive;
+  letter-spacing: 2px;
 }
 
 .navbar-brand::before {
-  content: "📄";
+  content: "🔥";
   font-size: 1.8rem;
   background: none;
   -webkit-background-clip: unset;
-  color: #667eea;
+  color: #f5576c;
 }
 
 .navbar-links {
@@ -66,15 +80,17 @@ body {
 .navbar-links a {
   text-decoration: none;
   color: #4a5568;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
 }
 
 .navbar-links a:hover {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  color: #f5576c;
+  background: rgba(245, 87, 108, 0.1);
 }
 
 /* ========== CARDS ========== */
@@ -100,9 +116,10 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #2d3748;
   font-size: 0.875rem;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .form-group input,
@@ -114,15 +131,15 @@ body {
   border-radius: 0.75rem;
   font-size: 1rem;
   transition: all 0.2s ease;
-  font-family: inherit;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  border-color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.2);
 }
 
 .form-group textarea {
@@ -136,10 +153,12 @@ body {
   border: none;
   border-radius: 0.75rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: inherit;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn-primary {
@@ -221,7 +240,7 @@ body {
 }
 
 .pricing-card.recommended {
-  border: 2px solid #667eea;
+  border: 2px solid #f5576c;
   transform: scale(1.02);
 }
 
@@ -230,13 +249,13 @@ body {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   padding: 0.25rem 1rem;
   border-radius: 2rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .price {
@@ -272,11 +291,12 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .features li::before {
   content: "✓";
-  color: #48bb78;
+  color: #f5576c;
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -297,7 +317,7 @@ body {
 }
 
 .progress {
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
   height: 12px;
   transition: width 0.5s ease;
   border-radius: 1rem;
@@ -309,6 +329,7 @@ body {
   padding: 3rem;
   font-size: 1.2rem;
   color: #718096;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* ========== FILE UPLOAD ========== */
@@ -323,13 +344,29 @@ body {
 }
 
 .file-upload-area:hover {
-  border-color: #667eea;
+  border-color: #f5576c;
   background: #edf2f7;
 }
 
 .file-upload-area.dragover {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  border-color: #f5576c;
+  background: rgba(245, 87, 108, 0.1);
+}
+
+/* ========== ANIMACIONES ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card, .pricing-card {
+  animation: fadeInUp 0.5s ease-out;
 }
 
 /* ========== RESPONSIVE ========== */
