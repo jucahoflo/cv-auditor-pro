@@ -206,6 +206,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error al obtener estadísticas' });
   }
 });
+
 // ========== GENERADOR DE CARTA DE PRESENTACIÓN ==========
 router.post('/cover-letter', authenticateToken, async (req, res) => {
   try {
