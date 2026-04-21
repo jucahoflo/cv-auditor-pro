@@ -1,14 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/index.html"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
   ]
 }
