@@ -22,7 +22,8 @@ function Navbar() {
         {user ? (
           <>
             <Link to="/dashboard">📊 Dashboard</Link>
-            <Link to="/audit">📄 Nueva Auditoría</Link>
+            <Link to="/audit">📄 Auditoría CV</Link>
+            <Link to="/cover-letter">📝 Carta Presentación</Link>
             <Link to="/history">📜 Historial</Link>
             <Link to="/pricing">💎 Planes</Link>
             {isAdmin && (

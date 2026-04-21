@@ -11,6 +11,7 @@ import Audit from './pages/Audit';
 import Pricing from './pages/Pricing';
 import History from './pages/History';
 import AdminDashboard from './pages/AdminDashboard';
+import CoverLetter from './pages/CoverLetter';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/audit" element={<PrivateRoute><Audit /></PrivateRoute>} />
+        <Route path="/cover-letter" element={<PrivateRoute><CoverLetter /></PrivateRoute>} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
         <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/dashboard" />} />

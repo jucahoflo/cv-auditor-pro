@@ -206,5 +206,54 @@ router.get('/stats', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error al obtener estadísticas' });
   }
 });
+// ========== GENERADOR DE CARTA DE PRESENTACIÓN ==========
+router.post('/cover-letter', authenticateToken, async (req, res) => {
+  try {
+    const { jobTitle, companyName, skills, additionalInfo } = req.body;
+    const Groq = require('groq-sdk');
+    
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY
+    });
+
+    const prompt = `Genera una carta de presentación profesional para el siguiente puesto:
+
+Puesto: ${jobTitle}
+Empresa: ${companyName}
+Habilidades destacadas: ${skills}
+Información adicional: ${additionalInfo || 'Ninguna'}
+
+La carta debe:
+1. Ser profesional y persuasiva
+2. Tener formato de carta formal con lugar y fecha
+3. Incluir saludo, introducción, cuerpo y cierre
+4. Ser personalizada para la empresa y el puesto
+5. Extensión: aproximadamente 250-350 palabras
+
+Devuelve SOLO la carta de presentación, sin texto adicional.`;
+
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: "Eres un experto redactor de cartas de presentación. Genera cartas profesionales, persuasivas y personalizadas."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.5,
+    });
+
+    const coverLetter = completion.choices[0]?.message?.content;
+    
+    res.json({ success: true, coverLetter });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error al generar la carta de presentación' });
+  }
+});
 
 module.exports = router;
