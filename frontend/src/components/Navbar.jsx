@@ -11,10 +11,12 @@ function Navbar() {
     navigate('/login');
   };
 
+  const isAdmin = user?.subscription?.role === 'admin';
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
-        KillerJobs
+        🔥 KillerJobs
       </Link>
       <div className="navbar-links">
         {user ? (
@@ -23,8 +25,13 @@ function Navbar() {
             <Link to="/audit">📄 Nueva Auditoría</Link>
             <Link to="/history">📜 Historial</Link>
             <Link to="/pricing">💎 Planes</Link>
+            {isAdmin && (
+              <Link to="/admin" style={{ background: '#f5576c', color: 'white', borderRadius: '20px', padding: '0.5rem 1rem' }}>
+                👑 Admin
+              </Link>
+            )}
             <span style={{ 
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               padding: '0.25rem 0.75rem',
               borderRadius: '2rem',
               color: 'white',

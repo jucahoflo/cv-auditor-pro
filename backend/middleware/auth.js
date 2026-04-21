@@ -26,6 +26,12 @@ const checkSubscription = async (req, res, next) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    // ADMIN: pasa sin verificar créditos
+    if (user.subscription.role === 'admin') {
+      req.userData = user;
+      return next();
+    }
+
     // Verificar si tiene créditos disponibles
     if (user.subscription.creditsUsed >= user.subscription.creditsLimit && user.subscription.plan !== 'enterprise') {
       return res.status(403).json({ 
@@ -54,4 +60,20 @@ const checkSubscription = async (req, res, next) => {
   }
 };
 
-module.exports = { authenticateToken, checkSubscription };
+// Verificar si es administrador
+const isAdmin = async (req, res, next) => {
+  try {
+    const User = require('../models/User');
+    const user = await User.findById(req.user.userId);
+    
+    if (!user || user.subscription.role !== 'admin') {
+      return res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' });
+    }
+    
+    next();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { authenticateToken, checkSubscription, isAdmin };

@@ -31,9 +31,23 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 5
     },
-    stripeCustomerId: String,
-    stripeSubscriptionId: String,
-    subscriptionEndDate: Date
+    stripeCustomerId: {
+      type: String,
+      default: null
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null
+    },
+    subscriptionEndDate: {
+      type: Date,
+      default: null
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user'
+    }
   },
   auditHistory: [{
     fileName: String,

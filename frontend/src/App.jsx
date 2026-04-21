@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Audit from './pages/Audit';
 import Pricing from './pages/Pricing';
 import History from './pages/History';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -17,6 +18,8 @@ function AppRoutes() {
   if (loading) {
     return <div className="loading">Cargando...</div>;
   }
+
+  const isAdmin = user?.subscription?.role === 'admin';
 
   return (
     <>
@@ -28,6 +31,7 @@ function AppRoutes() {
         <Route path="/audit" element={<PrivateRoute><Audit /></PrivateRoute>} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
+        <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
       <Footer />
@@ -45,4 +49,4 @@ function App() {
   );
 }
 
-export default App;  // ← ESTA LÍNEA ES CRUCIAL
+export default App;
