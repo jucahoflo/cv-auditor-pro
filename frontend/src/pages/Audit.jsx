@@ -1,150 +1,247 @@
-import jsPDF from 'jspdf';
+import React, { useState, useRef } from 'react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { generatePDF } from '../services/pdfService';
 
-export const generatePDF = (analysis, fileName, jobDescription, user) => {
-  const doc = new jsPDF();
-  const currentDate = new Date().toLocaleDateString();
-  const currentTime = new Date().toLocaleTimeString();
+function Audit() {
+  const [file, setFile] = useState(null);
+  const [jobDescription, setJobDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+  const { user } = useAuth();
 
-  const primary = [102, 126, 234];
-  const secondary = [245, 87, 108];
-  const dark = [30, 30, 46];
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile && selectedFile.type === 'application/pdf') {
+      setFile(selectedFile);
+      setError('');
+    } else {
+      setError('Por favor selecciona un archivo PDF válido');
+    }
+  };
 
-  // HEADER
-  doc.setFontSize(32);
-  doc.setTextColor(secondary[0], secondary[1], secondary[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('KILLERJOBS', 105, 25, { align: 'center' });
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
 
-  doc.setFontSize(11);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Auditoría de CV con Inteligencia Artificial', 105, 35, { align: 'center' });
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
 
-  doc.setDrawColor(primary[0], primary[1], primary[2]);
-  doc.setLineWidth(0.5);
-  doc.line(30, 42, 180, 42);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type === 'application/pdf') {
+      setFile(droppedFile);
+      setError('');
+    } else {
+      setError('Por favor sube un archivo PDF válido');
+    }
+  };
 
-  // METADATOS
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.text(`📅 Fecha: ${currentDate}`, 20, 55);
-  doc.text(`⏰ Hora: ${currentTime}`, 20, 62);
-  doc.text(`👤 Candidato: ${user?.name || 'N/A'}`, 20, 69);
-  doc.text(`📄 CV: ${fileName || 'N/A'}`, 20, 76);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setError('Por favor selecciona un archivo CV');
+      return;
+    }
+    if (!jobDescription.trim()) {
+      setError('Por favor ingresa la descripción del puesto');
+      return;
+    }
 
-  // SCORE
-  const score = analysis.score || 0;
-  doc.setFontSize(24);
-  doc.setTextColor(primary[0], primary[1], primary[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`PUNTUACIÓN: ${score}%`, 140, 70, { align: 'center' });
+    setLoading(true);
+    setError('');
+    setResult(null);
 
-  const barWidth = (score / 100) * 40;
-  doc.setFillColor(primary[0], primary[1], primary[2]);
-  doc.rect(140, 75, barWidth, 4, 'F');
-  doc.setFillColor(220, 220, 220);
-  doc.rect(140 + barWidth, 75, 40 - barWidth, 4, 'F');
+    const formData = new FormData();
+    formData.append('cv', file);
+    formData.append('jobDescription', jobDescription);
 
-  // FORTALEZAS
-  let y = 95;
-  doc.setFontSize(12);
-  doc.setTextColor(72, 187, 120);
-  doc.setFont('helvetica', 'bold');
-  doc.text('✅ FORTALEZAS', 20, y);
-  y += 7;
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.setFont('helvetica', 'normal');
-  if (analysis.strengths?.length) {
-    analysis.strengths.forEach((s) => {
-      doc.text(`• ${s}`, 25, y);
-      y += 6;
-    });
-  } else {
-    doc.text('• No se detectaron fortalezas específicas', 25, y);
-    y += 6;
-  }
+    try {
+      const response = await axios.post('/api/audit/analyze', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setResult(response.data.analysis);
+    } catch (error) {
+      setError(error.response?.data?.error || 'Error al analizar el CV');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ÁREAS DE MEJORA
-  y += 5;
-  doc.setFontSize(12);
-  doc.setTextColor(245, 101, 101);
-  doc.setFont('helvetica', 'bold');
-  doc.text('⚠️ ÁREAS DE MEJORA', 20, y);
-  y += 7;
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.setFont('helvetica', 'normal');
-  if (analysis.weaknesses?.length) {
-    analysis.weaknesses.forEach((w) => {
-      doc.text(`• ${w}`, 25, y);
-      y += 6;
-    });
-  } else {
-    doc.text('• No se detectaron áreas críticas', 25, y);
-    y += 6;
-  }
+  const handleDownloadPDF = () => {
+    if (result) {
+      generatePDF(result, file?.name, user);
+    }
+  };
 
-  // HABILIDADES FALTANTES
-  y += 5;
-  doc.setFontSize(12);
-  doc.setTextColor(237, 137, 54);
-  doc.setFont('helvetica', 'bold');
-  doc.text('🎯 HABILIDADES FALTANTES', 20, y);
-  y += 7;
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.setFont('helvetica', 'normal');
-  if (analysis.missingSkills?.length) {
-    analysis.missingSkills.forEach((m) => {
-      doc.text(`• ${m}`, 25, y);
-      y += 6;
-    });
-  } else {
-    doc.text('• No se detectaron habilidades faltantes', 25, y);
-    y += 6;
-  }
+  return (
+    <div className="container">
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍 Auditoría KillerJobs</h1>
+        <p style={{ color: '#718096' }}>Sube tu CV y pega la descripción del puesto para obtener un análisis profesional con IA</p>
+      </div>
 
-  // RECOMENDACIONES
-  y += 5;
-  doc.setFontSize(12);
-  doc.setTextColor(66, 153, 225);
-  doc.setFont('helvetica', 'bold');
-  doc.text('💡 RECOMENDACIONES', 20, y);
-  y += 7;
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.setFont('helvetica', 'normal');
-  if (analysis.recommendations?.length) {
-    analysis.recommendations.forEach((r) => {
-      doc.text(`• ${r}`, 25, y);
-      y += 6;
-    });
-  } else {
-    doc.text('• No hay recomendaciones adicionales', 25, y);
-    y += 6;
-  }
+      <div className="card">
+        {error && <div className="alert alert-error">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>📄 Archivo CV (PDF)</label>
+            <div
+              className={`file-upload-area ${dragOver ? 'dragover' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current.click()}
+            >
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+              />
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📁</div>
+              <p style={{ marginBottom: '0.5rem' }}>
+                {file ? file.name : 'Arrastra tu CV aquí o haz clic para seleccionar'}
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#a0aec0' }}>Solo archivos PDF (máx. 5MB)</p>
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label>📝 Descripción del Puesto</label>
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              placeholder="Pega aquí la descripción del puesto que quieres evaluar..."
+              required
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className="btn btn-primary" 
+            disabled={loading}
+            style={{ width: '100%' }}
+          >
+            {loading ? '🔍 Analizando...' : '🎯 Analizar CV'}
+          </button>
+        </form>
+      </div>
 
-  // RESUMEN
-  y += 8;
-  doc.setFontSize(11);
-  doc.setTextColor(primary[0], primary[1], primary[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('📋 RESUMEN EJECUTIVO', 20, y);
-  y += 7;
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.setFont('helvetica', 'normal');
-  const summary = analysis.summary || 'Análisis completado exitosamente.';
-  const splitSummary = doc.splitTextToSize(summary, 170);
-  doc.text(splitSummary, 20, y);
+      {result && (
+        <div className="card">
+          <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>📊 Resultado del Análisis</h3>
+          
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{
+              width: '150px',
+              height: '150px',
+              margin: '0 auto',
+              background: `conic-gradient(#667eea 0deg ${result.score * 3.6}deg, #e2e8f0 ${result.score * 3.6}deg 360deg)`,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div style={{
+                width: '120px',
+                height: '120px',
+                background: 'white',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column'
+              }}>
+                <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#667eea' }}>
+                  {result.score}%
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#718096' }}>Compatibilidad</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="dashboard-grid">
+            <div>
+              <h4 style={{ color: '#48bb78', marginBottom: '0.75rem' }}>✅ Fortalezas</h4>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {result.strengths?.map((s, i) => (
+                  <li key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>✓ {s}</li>
+                ))}
+              </ul>
+              
+              <h4 style={{ color: '#f56565', marginTop: '1rem', marginBottom: '0.75rem' }}>⚠️ Áreas de Mejora</h4>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {result.weaknesses?.map((w, i) => (
+                  <li key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>⚠ {w}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 style={{ color: '#ed8936', marginBottom: '0.75rem' }}>🎯 Habilidades Faltantes</h4>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {result.missingSkills?.map((m, i) => (
+                  <li key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>+ {m}</li>
+                ))}
+              </ul>
+              
+              <h4 style={{ color: '#4299e1', marginTop: '1rem', marginBottom: '0.75rem' }}>💡 Recomendaciones</h4>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {result.recommendations?.map((r, i) => (
+                  <li key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>💡 {r}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <div style={{ 
+            marginTop: '1.5rem', 
+            padding: '1rem', 
+            background: '#f7fafc', 
+            borderRadius: '0.75rem',
+            borderLeft: '4px solid #667eea'
+          }}>
+            <h4 style={{ marginBottom: '0.5rem' }}>📋 Resumen Ejecutivo</h4>
+            <p style={{ color: '#4a5568' }}>{result.summary}</p>
+          </div>
 
-  // FOOTER
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('KillerJobs - Auditoría de CV con IA', 105, 275, { align: 'center' });
-  doc.setTextColor(secondary[0], secondary[1], secondary[2]);
-  doc.text('🎨 Diseñado por Juan Carlos Holguín | Getsumi Design Architect', 105, 265, { align: 'center' });
+          {/* Botón de descarga PDF */}
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button
+              onClick={handleDownloadPDF}
+              className="btn btn-primary"
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '30px',
+                color: 'white',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '1rem'
+              }}
+            >
+              📄 DESCARGAR REPORTE PDF ⬇️
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-  doc.save(`KillerJobs_Auditoria_${user?.name || 'Candidato'}_${Date.now()}.pdf`);
-};
+export default Audit;
