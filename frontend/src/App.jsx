@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';  // ← AGREGAR ESTA LÍNEA
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
+      <Footer />  {/* ← AGREGAR ESTA LÍNEA */}
     </>
   );
 }
