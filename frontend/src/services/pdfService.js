@@ -1,15 +1,17 @@
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export const generatePDF = (analysis, fileName, jobDescription, user) => {
   const doc = new jsPDF();
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
 
+  // Colores
   const primary = [102, 126, 234];
   const secondary = [245, 87, 108];
   const dark = [30, 30, 46];
 
-  // HEADER
+  // ========== HEADER ==========
   doc.setFontSize(32);
   doc.setTextColor(secondary[0], secondary[1], secondary[2]);
   doc.setFont('helvetica', 'bold');
@@ -24,7 +26,7 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
   doc.setLineWidth(0.5);
   doc.line(30, 42, 180, 42);
 
-  // METADATOS
+  // ========== METADATOS ==========
   doc.setFontSize(9);
   doc.setTextColor(dark[0], dark[1], dark[2]);
   doc.text(`📅 Fecha: ${currentDate}`, 20, 55);
@@ -32,20 +34,21 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
   doc.text(`👤 Candidato: ${user?.name || 'N/A'}`, 20, 69);
   doc.text(`📄 CV: ${fileName || 'N/A'}`, 20, 76);
 
-  // SCORE
+  // ========== SCORE ==========
   const score = analysis.score || 0;
   doc.setFontSize(24);
   doc.setTextColor(primary[0], primary[1], primary[2]);
   doc.setFont('helvetica', 'bold');
   doc.text(`PUNTUACIÓN: ${score}%`, 140, 70, { align: 'center' });
 
+  // Barra de progreso
   const barWidth = (score / 100) * 40;
   doc.setFillColor(primary[0], primary[1], primary[2]);
   doc.rect(140, 75, barWidth, 4, 'F');
   doc.setFillColor(220, 220, 220);
   doc.rect(140 + barWidth, 75, 40 - barWidth, 4, 'F');
 
-  // FORTALEZAS
+  // ========== FORTALEZAS ==========
   let y = 95;
   doc.setFontSize(12);
   doc.setTextColor(72, 187, 120);
@@ -65,7 +68,7 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
     y += 6;
   }
 
-  // ÁREAS DE MEJORA
+  // ========== ÁREAS DE MEJORA ==========
   y += 5;
   doc.setFontSize(12);
   doc.setTextColor(245, 101, 101);
@@ -85,7 +88,7 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
     y += 6;
   }
 
-  // HABILIDADES FALTANTES
+  // ========== HABILIDADES FALTANTES ==========
   y += 5;
   doc.setFontSize(12);
   doc.setTextColor(237, 137, 54);
@@ -105,7 +108,7 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
     y += 6;
   }
 
-  // RECOMENDACIONES
+  // ========== RECOMENDACIONES ==========
   y += 5;
   doc.setFontSize(12);
   doc.setTextColor(66, 153, 225);
@@ -125,7 +128,7 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
     y += 6;
   }
 
-  // RESUMEN
+  // ========== RESUMEN ==========
   y += 8;
   doc.setFontSize(11);
   doc.setTextColor(primary[0], primary[1], primary[2]);
@@ -139,12 +142,21 @@ export const generatePDF = (analysis, fileName, jobDescription, user) => {
   const splitSummary = doc.splitTextToSize(summary, 170);
   doc.text(splitSummary, 20, y);
 
-  // FOOTER
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('KillerJobs - Auditoría de CV con IA', 105, 275, { align: 'center' });
-  doc.setTextColor(secondary[0], secondary[1], secondary[2]);
-  doc.text('🎨 Diseñado por Juan Carlos Holguín | Getsumi Design Architect', 105, 265, { align: 'center' });
+  // ========== FOOTER ==========
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('KillerJobs - Auditoría de CV con IA', 105, 285, { align: 'center' });
+    doc.text(`Página ${i} de ${pageCount}`, 180, 285, { align: 'center' });
+  }
 
+  // ========== FIRMA DISEÑADOR ==========
+  doc.setFontSize(8);
+  doc.setTextColor(secondary[0], secondary[1], secondary[2]);
+  doc.text('🎨 Diseñado por Juan Carlos Holguín | Getsumi Design Architect', 105, 275, { align: 'center' });
+
+  // Guardar PDF
   doc.save(`KillerJobs_Auditoria_${user?.name || 'Candidato'}_${Date.now()}.pdf`);
 };
