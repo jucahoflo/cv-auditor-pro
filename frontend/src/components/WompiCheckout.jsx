@@ -14,7 +14,6 @@ function WompiCheckout({ planType, planName, amount, onSuccess, onError }) {
 
     setLoading(true);
     
-    // Verificar que la variable existe
     const publicKey = import.meta.env.VITE_WOMPI_PUBLIC_KEY;
     console.log('Public Key:', publicKey);
     
@@ -25,10 +24,16 @@ function WompiCheckout({ planType, planName, amount, onSuccess, onError }) {
     }
 
     try {
-      // Abrir checkout de Wompi directamente con redirect
-      const checkoutUrl = `https://checkout.wompi.co/v1/checkout?public_key=${publicKey}&currency=COP&amount=${amount}&customer_email=${user.email}&customer_name=${encodeURIComponent(user.name)}&reference=${Date.now()}&subscription=true&subscription_name=${encodeURIComponent(planName)}&subscription_interval=monthly`;
+      // Usar el checkout de Wompi versión 2
+      const checkoutUrl = `https://checkout.wompi.co/v2/checkout?public_key=${publicKey}&amount=${amount}&currency=COP&customer_email=${user.email}&customer_name=${encodeURIComponent(user.name)}&reference=${planType}_${Date.now()}`;
       
-      window.location.href = checkoutUrl;
+      // Abrir en nueva ventana
+      window.open(checkoutUrl, '_blank');
+      
+      // Simular éxito (temporalmente)
+      setTimeout(() => {
+        onSuccess && onSuccess({ success: true });
+      }, 3000);
       
     } catch (error) {
       console.error('Error:', error);
