@@ -17,22 +17,16 @@ function WompiCheckout({ planType, planName, amount, onError }) {
       return;
     }
 
-    // Usar la ruta /v2/checkout (NO /hello)
-    const baseUrl = 'https://checkout.wompi.co/v2/checkout';
+    // Parámetros mínimos pero obligatorios
+    // Wompi requiere que amount-in-cents sea un número entero (centavos)
+    const amountInCents = amount * 100;
     
-    // Crear los parámetros de forma explícita
-    const params = new URLSearchParams({
-      'public-key': publicKey,
-      'currency': 'COP',
-      'amount-in-cents': (amount * 100).toString(), // Wompi trabaja con centavos
-      'customer-email': user.email,
-      'customer-name': user.name,
-      'reference': `${planType}_${user.id}_${Date.now()}`
-    });
-
-    const url = `${baseUrl}?${params.toString()}`;
+    // Construir URL manualmente (sin URLSearchParams para evitar codificación doble)
+    const url = `https://checkout.wompi.co/v2/checkout?public-key=${publicKey}&currency=COP&amount-in-cents=${amountInCents}&customer-email=${user.email}&reference=${planType}_${Date.now()}`;
     
-    console.log('Redirigiendo a Wompi con URL:', url);
+    console.log('URL generada:', url);
+    
+    // Abrir en la misma ventana
     window.location.href = url;
   };
 
