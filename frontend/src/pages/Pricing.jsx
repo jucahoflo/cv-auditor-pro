@@ -1,49 +1,26 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import WompiCheckout from '../components/WompiCheckout';
 
 function Pricing() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const BASIC_PRICE_ID = 'price_1TMHOn4GZdNJCcqJNimyfomO';
+  const handlePaymentSuccess = () => {
+    setLoading(false);
+    alert('🎉 ¡Suscripción exitosa! Tu plan ha sido actualizado.');
+    window.location.href = '/dashboard';
+  };
 
-  const handleSubscribe = async () => {
-    if (!user) {
-      navigate('/register');
-      return;
-    }
-
-    setLoading(true);
-    setSelectedPlan('basic');
-
-    try {
-      const response = await axios.post('/api/payments/create-checkout-session', {
-        priceId: BASIC_PRICE_ID
-      });
-
-      const stripeUrl = response.data.url;
-      if (stripeUrl) {
-        window.location.href = stripeUrl;
-      } else {
-        throw new Error('No se recibió URL de checkout');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.response?.data?.error || 'Error al iniciar el proceso de pago');
-    } finally {
-      setLoading(false);
-      setSelectedPlan(null);
-    }
+  const handlePaymentError = (error) => {
+    setLoading(false);
+    alert(`❌ Error en el pago: ${error}`);
   };
 
   return (
     <div className="container">
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Planes para CV-AUDITOR-PRO</h1>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Planes KillerJobs</h1>
         <p style={{ color: '#718096' }}>Elige el plan que mejor se adapte a tus necesidades</p>
       </div>
       
@@ -74,13 +51,13 @@ function Pricing() {
           </button>
         </div>
 
-        {/* Plan Básico */}
+        {/* Plan Básico - Wompi */}
         <div className="pricing-card recommended">
           <div className="recommended-badge">🔥 MÁS POPULAR</div>
           <h2 style={{ fontSize: '1.5rem' }}>Básico</h2>
           <div className="price">
             <span className="currency">$</span>
-            <span className="amount">19.99</span>
+            <span className="amount">30,000</span>
             <span className="period">/mes</span>
           </div>
           <div style={{ marginBottom: '1rem', color: '#667eea', fontWeight: '600' }}>
@@ -93,28 +70,20 @@ function Pricing() {
             <li>✓ Soporte prioritario</li>
             <li>✓ Reportes detallados</li>
           </ul>
-          <button 
-            className="btn btn-primary"
-            onClick={handleSubscribe}
-            disabled={loading || user?.subscription?.plan === 'basic'}
-            style={{ width: '100%' }}
-          >
-            {loading && selectedPlan === 'basic' ? '⏳ Procesando...' : user?.subscription?.plan === 'basic' ? '✅ Plan Actual' : '🚀 Suscribirse por $19.99/mes'}
-          </button>
+          {user?.subscription?.plan === 'basic' ? (
+            <button className="btn btn-secondary" style={{ width: '100%' }} disabled>
+              ✅ Plan Actual
+            </button>
+          ) : (
+            <WompiCheckout
+              planType="basic"
+              planName="KillerJobs Básico"
+              amount={30000}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            />
+          )}
         </div>
-      </div>
-
-      {/* Info adicional */}
-      <div style={{ 
-        textAlign: 'center', 
-        marginTop: '2rem', 
-        padding: '1rem',
-        background: '#f7fafc',
-        borderRadius: '1rem',
-        fontSize: '0.875rem',
-        color: '#718096'
-      }}>
-        <p>Todos los planes incluyen análisis con IA de última generación. Los precios son en USD más impuestos aplicables.</p>
       </div>
     </div>
   );
