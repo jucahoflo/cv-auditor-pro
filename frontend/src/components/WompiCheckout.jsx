@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 
-function WompiCheckout({ planType, planName, amount, onSuccess, onError }) {
+function WompiCheckout({ planType, planName, amount, onError }) {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
 
   const handlePayment = () => {
     if (!user) {
@@ -11,37 +10,27 @@ function WompiCheckout({ planType, planName, amount, onSuccess, onError }) {
       return;
     }
 
-    setLoading(true);
-    
     const publicKey = import.meta.env.VITE_WOMPI_PUBLIC_KEY;
+    
     if (!publicKey) {
-      onError('Variable de entorno VITE_WOMPI_PUBLIC_KEY no configurada');
-      setLoading(false);
+      onError('Error de configuración: clave de Wompi no encontrada');
       return;
     }
 
-    // Usar el checkout de Wompi versión 2 con enlace directo
-    const checkoutUrl = `https://checkout.wompi.co/v2/checkout?public_key=${publicKey}&amount=${amount}&currency=COP&customer_email=${user.email}&customer_name=${encodeURIComponent(user.name)}&reference=${planType}_${Date.now()}`;
+    // URL directa de checkout de Wompi
+    const url = `https://checkout.wompi.co/v2/checkout?public_key=${publicKey}&amount=${amount}&currency=COP&customer_email=${user.email}&customer_name=${encodeURIComponent(user.name)}&reference=${planType}-${Date.now()}`;
     
-    // Guardar información en localStorage para procesar después del pago
-    localStorage.setItem('pendingSubscription', JSON.stringify({
-      planType,
-      amount,
-      timestamp: Date.now()
-    }));
-    
-    // Redirigir a Wompi
-    window.location.href = checkoutUrl;
+    // Redirigir directamente
+    window.location.href = url;
   };
 
   return (
     <button 
       onClick={handlePayment} 
       className="btn btn-primary"
-      disabled={loading}
       style={{ width: '100%' }}
     >
-      {loading ? 'Procesando...' : `Suscribirse por ${amount.toLocaleString('es-CO')} COP/mes`}
+      Suscribirse por {amount.toLocaleString('es-CO')} COP/mes
     </button>
   );
 }
